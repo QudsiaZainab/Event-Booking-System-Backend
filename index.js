@@ -1,38 +1,53 @@
-import express from 'express'
-import cors from 'cors'
+import express from 'express';
+import http from 'http';
+// import { Server } from 'socket.io';
+import cors from 'cors';
 import { connectDB } from './config/db.js';
-import 'dotenv/config'
+import 'dotenv/config';
 import authRouter from './routes/authRoutes.js';
 import eventRouter from './routes/eventRoutes.js';
 
+const app = express();
+const server = http.createServer(app);
+// const io = new Server(server, {
+//     cors: {
+//         origin: "*",
+//         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']
+//     }
+// });
+const port = 4000;
 
-// app config
-const app = express()
-const port = 4000
-
-// middleware
+// Middleware
 app.use(express.json());
-app.use(cors({
-    origin: "https://ebs-4rqt.onrender.com",
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  }));
+app.use(cors());
 
-
-//db connection
+// Database connection
 connectDB();
 
-
-// Use authentication routes
+// Routes
 app.use('/api/auth', authRouter);
 app.use('/api/events', eventRouter);
 
+// // WebSocket Logic
+// io.on('connection', (socket) => {
+//     console.log('A user connected');
 
+//     socket.on('seatBooked', (data) => {
+//         io.emit('updateSeats', data);  // Emit update to all connected clients
+//     });
 
-app.get("/", (req,res)=>{
-    res.send("API Working")
-})
+//     socket.on('disconnect', () => {
+//         console.log('User disconnected');
+//     });
+// });
 
-app.listen(port,()=>{
+// // Export io for direct access in other files
+// export { io };
+
+app.get("/", (req, res) => {
+    res.send("API Working with WebSockets");
+});
+
+server.listen(port, () => {
     console.log(`Server Started on http://localhost:${port}`);
-})
+});
